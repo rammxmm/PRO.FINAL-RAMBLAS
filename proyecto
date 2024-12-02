@@ -1,0 +1,885 @@
+using System;
+using System.IO;
+
+// Clase principal del programa
+public class ProgramaFinalalfin
+{
+    // Rutas de los archivos donde se almacenan los usuarios y videojuegos
+    public static string archivoUsuarios = "usuarios.txt";
+    public static string archivoVideojuegos = "videojuegos.txt";
+
+    // Método principal que inicia la ejecución del programa
+    public static void Main()
+    {
+        try
+        {
+            CreaArchivos(); // Llama al método para crear los archivos necesarios
+            MenuInicio(); // Llama al método que muestra el menú de inicio
+        }
+        catch (Exception ex)
+        {
+            // Manejo de excepciones para errores generales
+            Console.ForegroundColor = ConsoleColor.Red;
+            Console.WriteLine("Ocurrió un error: " + ex.Message);
+            Console.ResetColor();
+        }
+    }
+
+    // Método para crear archivos si no existen
+    public static void CreaArchivos()
+    {
+        try
+        {
+            // Verifica si el archivo de usuarios no existe, y lo crea
+            if (!File.Exists(archivoUsuarios))
+            {
+                File.Create(archivoUsuarios).Close();
+            }
+            // Verifica si el archivo de videojuegos no existe, y lo crea
+            if (!File.Exists(archivoVideojuegos))
+            {
+                File.Create(archivoVideojuegos).Close();
+            }
+        }
+        catch (Exception ex)
+        {
+            // Manejo de excepciones para errores al crear archivos
+            Console.ForegroundColor = ConsoleColor.Red;
+            Console.WriteLine("Error al crear archivos: " + ex.Message);
+            Console.ResetColor();
+        }
+    }
+
+    // Método que muestra el menú de inicio y maneja las opciones del usuario
+    public static void MenuInicio()
+    {
+        while (true) // Bucle infinito hasta que se elija salir
+        {
+            try
+            {
+                Console.Clear(); // Limpiar la consola
+
+                // Mostrar encabezado del menú
+                Console.ForegroundColor = ConsoleColor.Cyan;
+                Console.WriteLine("=========================================");
+                Console.WriteLine("      Bienvenido a Vicio Games @ramblass");
+                Console.WriteLine("=========================================");
+                Console.ResetColor();
+
+                // Opciones del menú
+                Console.ForegroundColor = ConsoleColor.Yellow;
+                Console.WriteLine("[1] Crear cuenta");
+                Console.ForegroundColor = ConsoleColor.Green;
+                Console.WriteLine("[2] Iniciar sesión");
+                Console.ForegroundColor = ConsoleColor.Red;
+                Console.WriteLine("[3] Salir");
+                Console.ResetColor();
+
+                Console.WriteLine("\nSeleccione una opción:");
+                Console.ForegroundColor = ConsoleColor.White;
+                Console.Write(">> ");
+                string opcion = Console.ReadLine(); // Leer opción del usuario
+                Console.ResetColor();
+
+                // Manejo de las opciones seleccionadas
+                switch (opcion)
+                {
+                    case "1":
+                        RegistrarUsuario(); // Llama al método para registrar un nuevo usuario
+                        break;
+                    case "2":
+                        IniciarSesion(); // Llama al método para iniciar sesión
+                        return; // Salir del bucle si se inicia sesión
+                    case "3":
+                        Console.ForegroundColor = ConsoleColor.Cyan;
+                        Console.WriteLine("¡Gracias por visitar Vicio Games!");
+                        Console.ResetColor();
+                        return; // Salir del programa
+                    default:
+                        Console.ForegroundColor = ConsoleColor.Red;
+                        Console.WriteLine("Opción no válida. Intente de nuevo."); // Mensaje de error para opción inválida
+                        Console.ResetColor();
+                        break;
+                }
+
+                Console.ForegroundColor = ConsoleColor.DarkGray;
+                Console.WriteLine("\nPresiona cualquier tecla para continuar...");
+                Console.ResetColor();
+                Console.ReadKey(); // Esperar a que el usuario presione una tecla
+            }
+            catch (Exception ex)
+            {
+                // Manejo de excepciones para errores en el menú
+                Console.ForegroundColor = ConsoleColor.Red;
+                Console.WriteLine("Ocurrió un error en el menú: " + ex.Message);
+                Console.ResetColor();
+            }
+        }
+    }
+
+    // Método para registrar un nuevo usuario
+    public static void RegistrarUsuario()
+    {
+        try
+        {
+            Console.Clear();
+            Console.ForegroundColor = ConsoleColor.Cyan;
+            Console.WriteLine("=== Crear Cuenta ===");
+            Console.ResetColor();
+
+            string id;
+            while (true)
+            {
+                Console.Write("Ingrese un ID único: ");
+                id = Console.ReadLine();
+                if (id == null || id.Trim() == "")
+                {
+                    Console.WriteLine("El ID no puede estar vacío.");
+                    continue;
+                }
+
+                string[] usuarios = File.ReadAllLines(archivoUsuarios);
+                if (Array.Exists(usuarios, u => u.StartsWith(id + ",")))
+                {
+                    Console.WriteLine("El ID ya está en uso. Intente con otro.");
+                    continue;
+                }
+
+                break;
+            }
+
+            string nombre;
+            while (true)
+            {
+                Console.Write("Ingrese un nombre de usuario: ");
+                nombre = Console.ReadLine();
+                if (nombre == null || nombre.Trim() == "")//verifica q no este vacia
+                {
+                    Console.WriteLine("El nombre de usuario no puede estar vacío.");
+                    continue;
+                }
+
+                break;
+            }
+
+            string contraseña;
+            while (true)
+            {
+                Console.Write("Ingrese una contraseña: ");
+                contraseña = Console.ReadLine();
+                if (contraseña == null || contraseña.Trim() == "")
+                {
+                    Console.WriteLine("La contraseña no puede estar vacía.");
+                    continue;
+                }
+
+                break;
+            }
+
+            // Crear el nuevo usuario
+            string nuevoUsuario = $"{id},{contraseña},{nombre},100,0,1,Activo|";
+            File.AppendAllText(archivoUsuarios, nuevoUsuario + Environment.NewLine);
+
+            Console.ForegroundColor = ConsoleColor.Green;
+            Console.WriteLine("Cuenta creada exitosamente. Ahora puede iniciar sesión.");
+            Console.ResetColor();
+            Console.ReadKey();
+        }
+        catch (Exception ex)
+        {
+            Console.ForegroundColor = ConsoleColor.Red;
+            Console.WriteLine("Error al registrar usuario: " + ex.Message);
+            Console.ResetColor();
+        }
+    }
+
+    // Método para verificar si un usuario existe
+    public static bool UsuarioExiste(string idUsuario)
+    {
+        string[] usuarios = File.ReadAllLines(archivoUsuarios); // Leer todos los usuarios
+        foreach (string usuario in usuarios)
+        {
+            if (usuario.StartsWith(idUsuario + ",")) // Verificar si el ID coincide
+            {
+                return true; // Retornar verdadero si el usuario existe
+            }
+        }
+        return false; // Retornar falso si el usuario no existe
+    }
+
+    // Método para iniciar sesión
+    public static void IniciarSesion()
+    {
+        try
+        {
+            Console.Clear(); // Limpiar la consola
+            Console.ForegroundColor = ConsoleColor.Cyan;
+            Console.WriteLine("=== INICIO DE SESIÓN ===");
+            Console.ResetColor();
+
+            // Solicitar nombre de usuario y contraseña
+            Console.Write("Ingrese su nombre de usuario: ");
+            string idUsuario = Console.ReadLine().ToLower();
+            Console.Write("Ingrese su contraseña: ");
+            string contraseña = Console.ReadLine();
+
+            string[] usuarios = File.ReadAllLines(archivoUsuarios); // Leer todos los usuarios
+            foreach (string usuario in usuarios)
+            {
+                string[] datos = usuario.Split('|')[0].Split(','); // Separar los datos del usuario
+                if (datos[2] == idUsuario && datos[1] == contraseña) // Verificar credenciales
+                {
+                    Console.ForegroundColor = ConsoleColor.Green;
+                    Console.WriteLine($"¡Bienvenido {datos[2]}!"); // Mensaje de bienvenida
+                    Console.ResetColor();
+                    MenuPrincipal(); // Llamar al menú principal si las credenciales son correctas
+                    return;
+                }
+            }
+
+            Console.ForegroundColor = ConsoleColor.Red;
+            Console.WriteLine("Credenciales incorrectas. Intente de nuevo."); // Mensaje de error si las credenciales son incorrectas
+            Console.ResetColor();
+            Console.WriteLine("Regresando al menú de inicio...");
+            Console.ReadKey();
+
+            MenuInicio(); // Regresar al menú de inicio si las credenciales son incorrectas
+        }
+        catch (Exception ex)
+        {
+            // Manejo de excepciones para errores al iniciar sesión
+            Console.ForegroundColor = ConsoleColor.Red;
+            Console.WriteLine("Error al iniciar sesión: " + ex.Message);
+            Console.ResetColor();
+        }
+    }
+
+    // Método que muestra el menú principal después de iniciar sesión
+    public static void MenuPrincipal()
+    {
+        while (true) // Bucle infinito hasta que se elija cerrar sesión
+        {
+            try
+            {
+                Console.Clear(); // Limpiar la consola
+                Console.ForegroundColor = ConsoleColor.Cyan;
+                Console.WriteLine("=========================================");
+                Console.WriteLine("           MENÚ PRINCIPAL");
+                Console.WriteLine("        BIENVENIDO A VICIO GAMES  @ramblass");
+                Console.WriteLine("=========================================");
+                Console.ResetColor();
+
+                // Opciones del menú principal
+                Console.ForegroundColor = ConsoleColor.Yellow;
+                Console.WriteLine("[1] Comprar Videojuego");
+                Console.ForegroundColor = ConsoleColor.Green;
+                Console.WriteLine("[2] Recargar Saldo");
+                Console.ForegroundColor = ConsoleColor.Blue;
+                Console.WriteLine("[3] Ver Catálogo");
+                Console.ForegroundColor = ConsoleColor.Magenta;
+                Console.WriteLine("[4] Registrar Usuario");
+                Console.ForegroundColor = ConsoleColor.Red;
+                Console.WriteLine("[5] Solicitar Reembolso");
+                Console.ForegroundColor = ConsoleColor.Cyan;
+                Console.WriteLine("[6] Cerrar Sesión");
+                Console.ForegroundColor = ConsoleColor.DarkYellow;
+                Console.WriteLine("[7] Regalar Videojuego");
+                Console.ForegroundColor = ConsoleColor.DarkRed;
+                Console.WriteLine("[8] Baja de Usuario");
+                Console.ResetColor();
+
+                Console.ForegroundColor = ConsoleColor.White;
+                Console.WriteLine("\nSeleccione una opción: ");
+                Console.ResetColor();
+                Console.Write(">> ");
+                string opcion = Console.ReadLine(); // Leer opción del usuario
+                Console.ResetColor();
+
+                // Manejo de las opciones seleccionadas en el menú principal
+                switch (opcion)
+                {
+                    case "1":
+                        ComprarVideojuego(); // Llama al método para comprar un videojuego
+                        break;
+                    case "2":
+                        RecargarSaldo(); // Llama al método para recargar saldo
+                        break;
+                    case "3":
+                        VerCatalogo(); // Llama al método para ver el catálogo de videojuegos
+                        break;
+                    case "4":
+                        RegistrarUsuarios(); // Llama al método para registrar un nuevo usuario
+                        break;
+                    case "5":
+                        SolicitarReembolso(); // Llama al método para solicitar un reembolso
+                        break;
+                    case "6":
+                        Console.WriteLine("\nSesión cerrada. ¡Hasta luego!"); // Mensaje de cierre de sesión
+                        return; // Salir del menú principal
+                    case "7":
+                        RegalarVideojuego(); // Llama al método para regalar un videojuego
+                        break;
+                    case "8":
+                        DarBajaUsuario(); // Llama al método para dar de baja a un usuario
+                        break;
+                    default:
+                        Console.ForegroundColor = ConsoleColor.Red;
+                        Console.WriteLine("\nOpción no válida. Intente de nuevo."); // Mensaje de error para opción inválida
+                        Console.ResetColor();
+                        break;
+                }
+
+                Console.ForegroundColor = ConsoleColor.DarkGray;
+                Console.WriteLine("\nPresiona cualquier tecla para continuar...");
+                Console.ResetColor();
+                Console.ReadKey(); // Esperar antes de volver al menú
+            }
+            catch (Exception ex)
+            {
+                // Manejo de excepciones para errores en el menú principal
+                Console.ForegroundColor = ConsoleColor.Red;
+                Console.WriteLine("Ocurrió un error en el menú principal: " + ex.Message);
+                Console.ResetColor();
+            }
+        }
+    }
+
+    // Método para registrar un nuevo usuario en el menú principal
+    public static void RegistrarUsuarios()
+    {
+        try
+        {
+            Console.Clear(); // Limpiar la consola
+            Console.WriteLine("Registro en Vicio Games");
+            Console.Write("Ingrese el ID del panagamer: "); // Solicitar ID del usuario
+            string id = Console.ReadLine();
+            Console.Write("Ingrese el nombre del panagamer: "); // Solicitar nombre del usuario
+            string nombre = Console.ReadLine();
+            Console.Write("Ingrese la contraseña: "); // Solicitar contraseña
+            string contraseña = Console.ReadLine();
+
+            // Crear un nuevo registro de usuario
+            string nuevoUsuario = $"{id},{contraseña},{nombre},0,0,100,Activo|";
+            File.AppendAllText(archivoUsuarios, nuevoUsuario + Environment.NewLine); // Guardar el nuevo usuario en el archivo
+            Console.WriteLine("Usuario registrado exitosamente."); // Mensaje de éxito
+            Console.WriteLine("Presiona cualquier tecla para seguir en el sistema");
+
+            Console.ReadKey(); // Esperar a que el usuario presione una tecla
+        }
+        catch (Exception ex)
+        {
+            // Manejo de excepciones para errores al registrar usuario
+            Console.ForegroundColor = ConsoleColor.Red;
+            Console.WriteLine("Error al registrar usuario: " + ex.Message);
+            Console.ResetColor();
+        }
+    }
+
+    // Método para comprar un videojuego
+    public static void ComprarVideojuego()
+    {
+        try
+        {
+            Console.Clear(); // Limpiar la consola
+            Console.WriteLine("Comprar videojuegos en Vicio Games");
+            Console.Write("Ingrese su ID de usuario: "); // Solicitar ID del usuario
+            string idUsuario = Console.ReadLine();
+
+            string[] usuarios = File.ReadAllLines(archivoUsuarios); // Leer todos los usuarios
+            int indiceUsuario = Array.FindIndex(usuarios, u => u.StartsWith(idUsuario + ",")); // Buscar el índice del usuario
+            if (indiceUsuario == -1)
+            {
+                Console.WriteLine("Usuario no encontrado."); // Mensaje de error si el usuario no existe
+                Console.WriteLine("Presiona cualquier tecla para seguir en el sistema");
+                Console.ReadKey(); // Esperar a que el usuario presione una tecla
+                return; // Salir del método si el usuario no se encuentra
+            }
+
+            // Separar los datos del usuario y su historial
+            string[] datosUsuario = usuarios[indiceUsuario].Split('|'); // Separar datos del usuario
+            string[] datosBasicos = datosUsuario[0].Split(','); // Datos básicos (dinero, puntos, etc.)
+            string historialCompras = datosUsuario.Length > 1 ? datosUsuario[1] : ""; // Historial de compras
+
+            int dineroUsuario = int.Parse(datosBasicos[3]); // Dinero del usuario
+            int puntosUsuario = int.Parse(datosBasicos[4]); // Puntos del usuario
+
+            // Mostrar catálogo de videojuegos
+            Console.WriteLine("=== Catálogo de Videojuegos ===");
+            string[] videojuegos = File.ReadAllLines(archivoVideojuegos); // Leer el catálogo de videojuegos
+            for (int i = 0; i < videojuegos.Length; i++)
+            {
+                string[] datosJuego = videojuegos[i].Split(','); // Separar datos del videojuego
+                if (datosJuego.Length < 4) continue; // Saltar si los datos son incompletos
+                Console.WriteLine($"{i + 1}. {datosJuego[1]} - ${datosJuego[3]} ({datosJuego[2]})"); // Mostrar videojuego
+            }
+
+            // Selección de videojuego
+            Console.Write("Seleccione el número del videojuego a comprar: ");
+            int indiceJuego;
+            if (!int.TryParse(Console.ReadLine(), out indiceJuego) || indiceJuego < 1 || indiceJuego > videojuegos.Length)
+            {
+                Console.WriteLine("Selección no válida."); // Mensaje de error si la selección es inválida
+                Console.WriteLine("Presiona cualquier tecla para seguir en el sistema");
+                Console.ReadKey(); // Esperar a que el usuario presione una tecla
+                return; // Salir del método si la selección es inválida
+            }
+
+            string[] juegoSeleccionado = videojuegos[indiceJuego - 1].Split(','); // Obtener datos del juego seleccionado
+            string nombreJuego = juegoSeleccionado[1]; // Nombre del juego
+            int precioJuego = int.Parse(juegoSeleccionado[3]); // Precio del juego
+
+            // Verificar si el usuario ya tiene el videojuego
+            if (historialCompras.Contains(nombreJuego))
+            {
+                Console.WriteLine("Ya tienes este videojuego."); // Mensaje si el usuario ya posee el juego
+                Console.WriteLine("Presiona cualquier tecla para seguir en el sistema");
+                Console.ReadKey(); // Esperar a que el usuario presione una tecla
+                return; // Salir del método si el usuario ya tiene el juego
+            }
+
+            // Preguntar cómo desea pagar
+            Console.WriteLine("¿Cómo desea pagar?");
+            Console.WriteLine("1. Solo dinero");
+            Console.WriteLine("2. Solo puntos");
+            Console.WriteLine("3. Mixto (dinero y puntos)");
+            string opcionPago = Console.ReadLine(); // Leer opción de pago
+
+            // Lógica de pago
+            switch (opcionPago)
+            {
+                case "1": // Solo dinero
+                    if (dineroUsuario < precioJuego)
+                    {
+                        Console.WriteLine("Fondos insuficientes."); // Mensaje si no hay suficiente dinero
+                        Console.WriteLine("Presiona cualquier tecla para seguir en el sistema");
+                        Console.ReadKey(); return; // Salir del método si no hay fondos
+                    }
+                    dineroUsuario -= precioJuego; // Restar el precio del dinero del usuario
+                    break;
+
+                case "2": // Solo puntos
+                    if (puntosUsuario < precioJuego)
+                    {
+                        Console.WriteLine("Puntos insuficientes."); // Mensaje si no hay suficientes puntos
+                        Console.WriteLine("Presiona cualquier tecla para seguir en el sistema");
+                        Console.ReadKey(); return; // Salir del método si no hay puntos
+                    }
+                    puntosUsuario -= precioJuego; // Restar el precio de los puntos del usuario
+                    break;
+
+                case "3": // Pago mixto
+                    if (puntosUsuario + dineroUsuario < precioJuego)
+                    {
+                        Console.WriteLine("Fondos insuficientes."); // Mensaje si no hay suficientes fondos
+                        Console.WriteLine("Presiona cualquier tecla para seguir en el sistema");
+                        Console.ReadKey(); return; // Salir del método si no hay fondos
+                    }
+
+                    if (puntosUsuario >= precioJuego)
+                    {
+                        puntosUsuario -= precioJuego; // Restar el precio de los puntos
+                    }
+                    else
+                    {
+                        dineroUsuario -= (precioJuego - puntosUsuario); // Restar el dinero necesario
+                        puntosUsuario = 0; // Usar todos los puntos
+                    }
+                    break;
+
+                default:
+                    Console.WriteLine("Opción no válida."); // Mensaje si la opción de pago es inválida
+                    Console.WriteLine("Presiona cualquier tecla para seguir en el sistema");
+                    Console.ReadKey(); // Esperar a que el usuario presione una tecla
+                    return; // Salir del método si la opción es inválida
+            }
+
+            // Generar puntos por la compra (10% del precio del juego)
+            puntosUsuario += (int)(precioJuego * 0.1); // Aumentar puntos por la compra
+
+            // Actualizar el historial de compras
+            historialCompras += $"{nombreJuego},{DateTime.Now.ToShortDateString()},{precioJuego};"; // Agregar compra al historial
+
+            // Reunir los datos actualizados y guardar en el archivo
+            datosBasicos[3] = dineroUsuario.ToString(); // Actualizar dinero
+            datosBasicos[4] = puntosUsuario.ToString(); // Actualizar puntos
+            usuarios[indiceUsuario] = $"{string.Join(",", datosBasicos)}|{historialCompras}"; // Actualizar registro del usuario
+
+            // Guardar los datos de nuevo en el archivo
+            File.WriteAllLines(archivoUsuarios, usuarios);
+
+            Console.WriteLine("¡Compra exitosa!"); // Mensaje de éxito
+            Console.WriteLine("Presiona cualquier tecla para seguir en el sistema");
+            Console.ReadKey(); // Esperar a que el usuario presione una tecla
+        }
+        catch (Exception ex)
+        {
+            // Manejo de excepciones para errores al comprar videojuego
+            Console.ForegroundColor = ConsoleColor.Red;
+            Console.WriteLine("Error al comprar videojuego: " + ex.Message);
+            Console.ResetColor();
+        }
+    }
+
+    // Método para recargar saldo del usuario
+    public static void RecargarSaldo()
+    {
+        try
+        {
+            Console.Clear(); // Limpiar la consola
+            Console.WriteLine("Recarga en Vicio Games");
+            Console.Write("Ingrese su ID de usuario: "); // Solicitar ID del usuario
+            string idUsuario = Console.ReadLine();
+
+            string[] usuarios = File.ReadAllLines(archivoUsuarios); // Leer todos los usuarios
+            int indiceUsuario = Array.FindIndex(usuarios, u => u.StartsWith(idUsuario + ",")); // Buscar el índice del usuario
+            if (indiceUsuario == -1)
+            {
+                Console.WriteLine("Usuario no encontrado."); // Mensaje de error si el usuario no existe
+                Console.WriteLine("Presiona cualquier tecla para seguir en el sistema");
+                Console.ReadKey(); // Esperar a que el usuario presione una tecla
+                return; // Salir del método si el usuario no se encuentra
+            }
+
+            string[] datosUsuario = usuarios[indiceUsuario].Split('|'); // Separar datos del usuario
+            string[] camposUsuario = datosUsuario[0].Split(','); // Datos básicos del usuario
+
+            Console.Write("Ingrese el monto a recargar: "); // Solicitar monto a recargar
+            if (!int.TryParse(Console.ReadLine(), out int recarga) || recarga < 1)
+            {
+                Console.WriteLine("Monto no válido."); // Mensaje de error si el monto es inválido
+                Console.WriteLine("Presiona cualquier tecla para seguir en el sistema");
+                Console.ReadKey(); // Esperar a que el usuario presione una tecla
+                return; // Salir del método si el monto es inválido
+            }
+
+            camposUsuario[3] = (int.Parse(camposUsuario[3]) + recarga).ToString(); // Actualizar el saldo del usuario
+            usuarios[indiceUsuario] = string.Join(",", camposUsuario) + "|" + (datosUsuario.Length > 1 ? datosUsuario[1] : ""); // Actualizar registro del usuario
+            File.WriteAllLines(archivoUsuarios, usuarios); // Guardar los cambios en el archivo
+
+            Console.WriteLine("Recarga exitosa."); // Mensaje de éxito
+            Console.WriteLine("Presiona cualquier tecla para seguir en el sistema");
+            Console.ReadKey(); // Esperar a que el usuario presione una tecla
+        }
+        catch (Exception ex)
+        {
+            // Manejo de excepciones para errores al recargar saldo
+            Console.ForegroundColor = ConsoleColor.Red;
+            Console.WriteLine("Error al recargar saldo: " + ex.Message);
+            Console.ResetColor();
+        }
+    }
+
+    // Método para dar de baja a un usuario
+    public static void DarBajaUsuario()
+    {
+        try
+        {
+            Console.Clear(); // Limpiar la consola
+            Console.WriteLine("Baja de usuarios en Vicio Games");
+            Console.Write("Ingrese el ID del usuario a dar de baja: "); // Solicitar ID del usuario
+            string idUsuario = Console.ReadLine();
+
+            string[] usuarios = File.ReadAllLines(archivoUsuarios); // Leer todos los usuarios
+            int indiceUsuario = Array.FindIndex(usuarios, u => u.StartsWith(idUsuario + ",")); // Buscar el índice del usuario
+            if (indiceUsuario == -1)
+            {
+                Console.WriteLine("Usuario no encontrado."); // Mensaje de error si el usuario no existe
+                Console.WriteLine("Presiona cualquier tecla para seguir en el sistema");
+                Console.ReadKey(); // Esperar a que el usuario presione una tecla
+                return; // Salir del método si el usuario no se encuentra
+            }
+
+            // Obtener datos del usuario
+            string[] datosUsuario = usuarios[indiceUsuario].Split(',');
+            int dineroUsuario = int.Parse(datosUsuario[3]); // Dinero disponible
+            string estadoUsuario = datosUsuario[5]; // Estado del usuario ("Activo" o "Inactivo")
+
+            // Verificar si el usuario tiene dinero disponible
+            if (dineroUsuario > 0)
+            {
+                Console.WriteLine("No se puede dar de baja al usuario porque tiene dinero disponible."); // Mensaje de error si el usuario tiene saldo
+                Console.WriteLine("Presiona cualquier tecla para seguir en el sistema");
+                Console.ReadKey(); // Esperar a que el usuario presione una tecla
+                return; // Salir del método si el usuario tiene saldo
+            }
+
+            // Si el usuario tiene estado "Activo", se cambia a "Inactivo" primero.
+            if (estadoUsuario == "Activo")
+            {
+                Console.WriteLine("El usuario está activo. Se cambiará su estado a 'Inactivo'.");
+                datosUsuario[5] = "Inactivo"; // Cambiar el estado a "Inactivo"
+                usuarios[indiceUsuario] = string.Join(",", datosUsuario); // Actualizar el registro del usuario
+                File.WriteAllLines(archivoUsuarios, usuarios); // Guardar los cambios en el archivo
+                Console.WriteLine("El estado del usuario ha sido cambiado a 'Inactivo'.");
+                Console.WriteLine("Presiona cualquier tecla para seguir en el sistema");
+                Console.ReadKey(); // Esperar a que el usuario presione una tecla
+            }
+            else
+            {
+                // Baja definitiva
+                Console.WriteLine("El usuario ya está inactivo. Procederemos a eliminarlo.");
+                // Eliminar al usuario del arreglo
+                string[] usuariosModificados = new string[usuarios.Length - 1];
+                int j = 0;
+
+                // Recorrer el arreglo original y copiar los elementos al nuevo arreglo
+                for (int i = 0; i < usuarios.Length; i++)
+                {
+                    if (i != indiceUsuario) // Si no es el índice a eliminar
+                    {
+                        usuariosModificados[j] = usuarios[i];
+                        j++;
+                    }
+                }
+
+                // Guardar el nuevo arreglo sin el usuario eliminado
+                File.WriteAllLines(archivoUsuarios, usuariosModificados);
+                Console.WriteLine("El usuario ha sido dado de baja definitivamente.");
+                Console.WriteLine("Presiona cualquier tecla para seguir en el sistema");
+                Console.ReadKey(); // Esperar a que el usuario presione una tecla
+            }
+        }
+        catch (Exception ex)
+        {
+            // Manejo de excepciones para errores al dar de baja al usuario
+            Console.ForegroundColor = ConsoleColor.Red;
+            Console.WriteLine("Error al dar de baja al usuario: " + ex.Message);
+            Console.ResetColor();
+        }
+    }
+
+    // Método para ver el catálogo de videojuegos
+    public static void VerCatalogo()
+    {
+        try
+        {
+            Console.Clear(); // Limpiar la consola
+            Console.WriteLine("Catálogo de videojuegos en Vicio Games");
+            Console.WriteLine("=== Catálogo de Videojuegos Vicio Games ===");
+            string[] videojuegos = File.ReadAllLines(archivoVideojuegos); // Leer el catálogo de videojuegos
+            foreach (string videojuego in videojuegos)
+            {
+                string[] detalles = videojuego.Split(','); // Separar detalles del videojuego
+                if (detalles.Length >= 4)
+                {
+                    Console.WriteLine($"{detalles[0]}: {detalles[1]} - {detalles[2]} - ${detalles[3]}"); // Mostrar videojuego
+                }
+            }
+            Console.WriteLine("Presiona cualquier tecla para seguir en el sistema");
+            Console.ReadKey(); // Esperar a que el usuario presione una tecla
+        }
+        catch (Exception ex)
+        {
+            // Manejo de excepciones para errores al ver el catálogo
+            Console.ForegroundColor = ConsoleColor.Red;
+            Console.WriteLine("Error al ver el catálogo: " + ex.Message);
+            Console.ResetColor();
+        }
+    }
+
+    // Método para solicitar un reembolso
+    public static void SolicitarReembolso()
+    {
+        try
+        {
+            Console.Clear(); // Limpiar la consola
+            Console.WriteLine("Reembolsos Vicio Games");
+            Console.Write("Ingrese su ID de usuario: "); // Solicitar ID del usuario
+            string idUsuario = Console.ReadLine();
+
+            string[] usuarios = File.ReadAllLines(archivoUsuarios); // Leer todos los usuarios
+            int indiceUsuario = Array.FindIndex(usuarios, u => u.StartsWith(idUsuario + ",")); // Buscar el índice del usuario
+            if (indiceUsuario == -1)
+            {
+                Console.WriteLine("Usuario no encontrado."); // Mensaje de error si el usuario no existe
+                Console.WriteLine("Presiona cualquier tecla para seguir en el sistema");
+                Console.ReadKey(); // Esperar a que el usuario presione una tecla
+                return; // Salir del método si el usuario no se encuentra
+            }
+
+            string[] datosUsuario = usuarios[indiceUsuario].Split('|'); // Separar datos del usuario
+            string[] camposUsuario = datosUsuario[0].Split(','); // Datos básicos del usuario
+            string historialCompras = datosUsuario.Length > 1 ? datosUsuario[1] : ""; // Historial de compras
+
+            Console.WriteLine("=== Historial de Compras ===");
+            if (historialCompras == "") // Verificación simple para comprobar si el historial está vacío
+            {
+                Console.WriteLine("No hay compras registradas."); // Mensaje si no hay compras
+                Console.WriteLine("Presiona cualquier tecla para seguir en el sistema");
+                Console.ReadKey(); // Esperar a que el usuario presione una tecla
+                return; // Salir del método si no hay compras
+            }
+
+            string[] compras = historialCompras.Split(';'); // Separar las compras en un arreglo
+            for (int i = 0; i < compras.Length; i++)
+            {
+                if (compras[i] == "") continue; // Ignorar entradas vacías
+                string[] detallesCompra = compras[i].Split(','); // Separar detalles de la compra
+                Console.WriteLine($"{i + 1}. {detallesCompra[0]} - ${detallesCompra[2]} (Fecha: {detallesCompra[1]})"); // Mostrar compra
+            }
+
+            Console.Write("Seleccione el número de la compra a reembolsar: "); // Solicitar selección de compra
+            if (!int.TryParse(Console.ReadLine(), out int indiceCompra) || indiceCompra < 1 || indiceCompra > compras.Length)
+            {
+                Console.WriteLine("Selección no válida."); // Mensaje de error si la selección es inválida
+                Console.WriteLine("Presiona cualquier tecla para seguir en el sistema");
+                Console.ReadKey(); // Esperar a que el usuario presione una tecla
+                return; // Salir del método si la selección es inválida
+            }
+
+            string compraSeleccionada = compras[indiceCompra - 1]; // Obtener la compra seleccionada
+            string[] detallesSeleccionados = compraSeleccionada.Split(','); // Separar detalles de la compra
+            string nombreJuego = detallesSeleccionados[0]; // Nombre del juego
+            int precioJuego = int.Parse(detallesSeleccionados[2]); // Precio del juego
+
+            // Actualizar saldo
+            int dineroUsuario = int.Parse(camposUsuario[3]); // Obtener dinero del usuario
+            dineroUsuario += precioJuego; // Reembolsar el dinero
+            camposUsuario[3] = dineroUsuario.ToString(); // Actualizar el saldo del usuario
+
+            // Eliminar la compra del historial
+            compras[indiceCompra - 1] = ""; // Marcar como vacío
+            historialCompras = ""; // Reiniciar el historial
+
+            // Reagregar compras que no se han reembolsado
+            for (int i = 0; i < compras.Length; i++)
+            {
+                if (compras[i] != "")
+                {
+                    if (historialCompras == "")
+                        historialCompras = compras[i];
+                    else
+                        historialCompras += ";" + compras[i];
+                }
+            }
+
+            // Actualizar datos del usuario
+            usuarios[indiceUsuario] = $"{string.Join(",", camposUsuario)}|{historialCompras}"; // Actualizar registro del usuario
+
+            // Escribir los datos de nuevo en el archivo
+            File.WriteAllLines(archivoUsuarios, usuarios);
+
+            Console.WriteLine($"Reembolso exitoso por el juego {nombreJuego}. Se ha reembolsado ${precioJuego}."); // Mensaje de éxito
+            Console.WriteLine("Presiona cualquier tecla para seguir en el sistema");
+            Console.ReadKey(); // Esperar a que el usuario presione una tecla
+        }
+        catch (Exception ex)
+        {
+            // Manejo de excepciones para errores al solicitar reembolso
+            Console.ForegroundColor = ConsoleColor.Red;
+            Console.WriteLine("Error al solicitar reembolso: " + ex.Message);
+            Console.ResetColor();
+        }
+    }
+
+    // Método para regalar un videojuego
+  
+    public static void RegalarVideojuego()
+    {
+        try
+        {
+            Console.Clear(); // Limpiar la consola
+            Console.WriteLine("Regalos de videojuegos en Vicio Games");
+            Console.Write("Ingrese su ID de usuario (Donante): "); // Solicitar ID del donante
+            string idDonante = Console.ReadLine();
+
+            string[] usuarios = File.ReadAllLines(archivoUsuarios); // Leer todos los usuarios
+            int indiceDonante = Array.FindIndex(usuarios, u => u.StartsWith(idDonante + ",")); // Buscar el índice del donante
+            if (indiceDonante == -1)
+            {
+                Console.WriteLine("Usuario no encontrado."); // Mensaje de error si el donante no existe
+                Console.WriteLine("Presiona cualquier tecla para seguir en el sistema");
+                Console.ReadKey(); // Esperar a que el usuario presione una tecla
+                return; // Salir del método si el donante no se encuentra
+            }
+
+            string[] datosDonante = usuarios[indiceDonante].Split('|'); // Separar datos del donante
+            string[] camposDonante = datosDonante[0].Split(','); // Datos básicos del donante
+
+            Console.WriteLine("=== Catálogo de Videojuegos ===");
+            string[] videojuegos = File.ReadAllLines(archivoVideojuegos); // Leer el catálogo de videojuegos
+            for (int i = 0; i < videojuegos.Length; i++)
+            {
+                string[] datosJuego = videojuegos[i].Split(','); // Separar datos del videojuego
+                if (datosJuego.Length < 4) continue; // Saltar juegos con datos incompletos
+                Console.WriteLine($"{i + 1}. {datosJuego[1]} - ${datosJuego[3]} ({datosJuego[2]})"); // Mostrar videojuego
+            }
+
+            Console.Write("Seleccione el número del videojuego a regalar: "); // Solicitar selección de videojuego
+            int indiceJuego;
+            if (!int.TryParse(Console.ReadLine(), out indiceJuego) || indiceJuego < 1 || indiceJuego > videojuegos.Length)
+            {
+                Console.WriteLine("Selección no válida."); // Mensaje de error si la selección es inválida
+                Console.WriteLine("Presiona cualquier tecla para seguir en el sistema");
+                Console.ReadKey(); // Esperar a que el usuario presione una tecla
+                return; // Salir del método si la selección es inválida
+            }
+
+            string[] juegoSeleccionado = videojuegos[indiceJuego - 1].Split(','); // Obtener datos del juego seleccionado
+            string nombreJuego = juegoSeleccionado[1]; // Nombre del juego
+            int precioJuego = int.Parse(juegoSeleccionado[3]); // Precio del juego
+
+            int saldoDonante = int.Parse(camposDonante[3]); // Obtener saldo del donante
+            if (saldoDonante < precioJuego)
+            {
+                Console.WriteLine("Fondos insuficientes para realizar el regalo."); // Mensaje si no hay suficiente saldo
+                Console.WriteLine("Presiona cualquier tecla para seguir en el sistema");
+                Console.ReadKey(); // Esperar a que el usuario presione una tecla
+                return; // Salir del método si no hay fondos
+            }
+
+            Console.Write("Ingrese el ID del usuario que recibirá el regalo: "); // Solicitar ID del receptor
+            string idReceptor = Console.ReadLine();
+
+            int indiceReceptor = Array.FindIndex(usuarios, u => u.StartsWith(idReceptor + ",")); // Buscar el índice del receptor
+            if (indiceReceptor == -1)
+            {
+                Console.WriteLine("Usuario receptor no encontrado."); // Mensaje de error si el receptor no existe
+                Console.WriteLine("Presiona cualquier tecla para seguir en el sistema");
+                Console.ReadKey(); // Esperar a que el usuario presione una tecla
+                return; // Salir del método si el receptor no se encuentra
+            }
+
+            string[] datosReceptor = usuarios[indiceReceptor].Split('|'); // Separar datos del receptor
+            string[] camposReceptor = datosReceptor[0].Split(','); // Datos básicos del receptor
+
+            string historialReceptor = datosReceptor.Length > 1 ? datosReceptor[1] : ""; // Historial de compras del receptor
+            if (historialReceptor.Contains(nombreJuego))
+            {
+                Console.WriteLine("El usuario ya posee este videojuego."); // Mensaje si el receptor ya tiene el juego
+                Console.WriteLine("Presiona cualquier tecla para seguir en el sistema");
+                Console.ReadKey(); // Esperar a que el usuario presione una tecla
+                return; // Salir del método si el receptor ya tiene el juego
+            }
+
+            // Cobrar al donante
+            saldoDonante -= precioJuego; // Restar el precio del juego del saldo del donante
+            camposDonante[3] = saldoDonante.ToString(); // Actualizar el saldo del donante
+
+            // Agregar el juego al historial del receptor
+            if (historialReceptor.Length > 0)
+            {
+                historialReceptor += ";"; // Agregar un separador si ya hay historial
+            }
+            historialReceptor += $"Regalo-{nombreJuego},{DateTime.Now.ToShortDateString()},{precioJuego}"; // Agregar el juego al historial del receptor
+
+            // Actualizar datos del donante y del receptor
+            usuarios[indiceDonante] = $"{string.Join(",", camposDonante)}|{(datosDonante.Length > 1 ? datosDonante[1] : "")}"; // Actualizar registro del donante
+            usuarios[indiceReceptor] = $"{string.Join(",", camposReceptor)}|{historialReceptor}"; // Actualizar registro del receptor
+
+            // Guardar los cambios en el archivo
+            File.WriteAllLines(archivoUsuarios, usuarios);
+
+            Console.WriteLine($"¡El videojuego {nombreJuego} ha sido regalado exitosamente a {camposReceptor[2]}!"); // Mensaje de éxito
+            Console.WriteLine("Presiona cualquier tecla para seguir en el sistema");
+            Console.ReadKey(); // Esperar a que el usuario presione una tecla
+        }
+        catch (Exception ex)
+        {
+            // Manejo de excepciones para errores al regalar videojuego
+            Console.ForegroundColor = ConsoleColor.Red;
+            Console.WriteLine("Error al regalar videojuego: " + ex.Message);
+            Console.ResetColor();
+        }
+    }
+}
