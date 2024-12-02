@@ -1,0 +1,7 @@
+1,FIFA 23,Deportes,150
+2,Among Us,Indie,200
+3,The Sims 4,Simulación,400
+4,Fortnite,Acción,200
+5,Farcry,Acción,60
+6,FNAF,Acción,60
+7,mortal,Pelas,50
